@@ -42,8 +42,15 @@ export async function POST(request: NextRequest) {
   }
 
   // Return the created short link
-  return new Response(JSON.stringify(data), {
-    status: 201,
-    headers: { "Content-Type": "application/json" },
-  });
+  return new Response(
+    JSON.stringify(
+      Object.assign({}, data, {
+        shortUrl: `${new URL(request.url).origin}/api/${slug}`,
+      })
+    ),
+    {
+      status: 201,
+      headers: { "Content-Type": "application/json" },
+    }
+  );
 }

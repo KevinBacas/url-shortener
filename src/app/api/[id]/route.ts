@@ -9,21 +9,31 @@ export async function GET(
   // Extract the ID from the request parameters
   const id = (await params).id;
 
-  const shortLink = await supabase
+  // Fetch the short link data from the database using the slug
+  const { error, data } = await supabase
     .from("short_links")
     .select("*")
     .eq("slug", id)
     .single();
 
-  if (!shortLink.data) {
+  // Handle errors or if no data is found
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // If no data is found, return a 404 response
+  if (!data || !data.target_url) {
     return new Response(JSON.stringify({ error: "Route not found" }), {
       status: 404,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  return new Response(JSON.stringify(shortLink.data), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  // Redirect to the target URL
+  if (data.target_url) {
+    return Response.redirect(data.target_url, 302);
+  }
 }
