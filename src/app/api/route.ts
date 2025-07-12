@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
   return new Response(
     JSON.stringify(
       Object.assign({}, data, {
-        shortUrl: `${request.headers.get("origin")}/api/${slug}`,
+        shortUrl: `${new URL(request.url).origin}/api/${slug}`,
       })
     ),
     {
