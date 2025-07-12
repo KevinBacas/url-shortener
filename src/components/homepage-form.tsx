@@ -8,15 +8,24 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Check, Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
-// Mock function to simulate URL shortening
-const shortenUrl = (url: string) => {
-  // Simulate a URL shortening service
-  return new Promise<string>((resolve) => {
-    setTimeout(() => {
-      resolve(`short.ly/${btoa(url)}`);
-    }, 1000);
+const shortenUrl = async (url: string) => {
+  const response = await fetch("/api/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ url }),
   });
+
+  if (!response.ok) {
+    throw new Error("Erreur lors de la création du lien raccourci");
+  }
+
+  const data = await response.json();
+  // Assumes the API returns { shortUrl: string }
+  return data.shortUrl;
 };
 
 export function HomepageForm() {
@@ -98,15 +107,16 @@ export function HomepageForm() {
       </form>
 
       {shortUrl && (
-        <Card className="mx-auto flex max-w-md items-center justify-between p-4">
-          <a
+        <Card className="mx-auto flex flex-row max-w-md items-center justify-between p-4">
+          <Link
             href={shortUrl}
+            prefetch={false}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline"
           >
             {shortUrl}
-          </a>
+          </Link>
           <Button variant="ghost" size="icon" onClick={copyToClipboard}>
             {copied ? (
               <Check className="h-4 w-4" />
