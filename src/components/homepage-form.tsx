@@ -117,7 +117,12 @@ export function HomepageForm() {
           >
             {shortUrl}
           </Link>
-          <Button variant="ghost" size="icon" onClick={copyToClipboard}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={copyToClipboard}
+            aria-label="Copier le lien"
+          >
             {copied ? (
               <Check className="h-4 w-4" />
             ) : (
