@@ -23,6 +23,9 @@ jobs:
         run: npm ci
 
       - name: Build project
+        env:
+          SUPABASE_URL: http://localhost:54321
+          SUPABASE_ANON_KEY: dummy-key
         run: npm run build
 
       - name: Run unit tests
