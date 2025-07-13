@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-
 import supabase from "@/utils/supabase/client";
+import logger from "@/lib/logger";
 
 export async function GET(
   request: NextRequest,
@@ -8,6 +8,7 @@ export async function GET(
 ) {
   // Extract the ID from the request parameters
   const id = (await params).id;
+  logger.info(`Received GET request for short link ID: ${id}`);
 
   // Fetch the short link data from the database using the slug
   const { error, data } = await supabase
@@ -15,6 +16,9 @@ export async function GET(
     .select("*")
     .eq("slug", id)
     .single();
+  if (error) {
+    logger.error(`Database error for ID ${id}: ${error.message}`);
+  }
 
   // Handle errors or if no data is found
   if (error) {
@@ -26,6 +30,7 @@ export async function GET(
 
   // If no data is found, return a 404 response
   if (!data || !data.target_url) {
+    logger.warn(`Short link not found for ID: ${id}`);
     return new Response(JSON.stringify({ error: "Route not found" }), {
       status: 404,
       headers: { "Content-Type": "application/json" },
@@ -34,6 +39,7 @@ export async function GET(
 
   // Redirect to the target URL
   if (data.target_url) {
+    logger.info(`Redirecting ID ${id} to target URL: ${data.target_url}`);
     return Response.redirect(data.target_url, 302);
   }
 }
