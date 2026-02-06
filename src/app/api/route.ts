@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   const nanoid = customAlphabet(
     process.env.CUSTOM_NANOID_ALPHABET ||
       "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    parseInt(process.env.CUSTOM_NANOID_LENGTH ?? "6")
+    parseInt(process.env.CUSTOM_NANOID_LENGTH ?? "6"),
   );
   const slug = nanoid();
   logger.info(`Generated slug: ${slug} for URL: ${url}`);
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       {
         slug,
         target_url: url,
-        user_id: "796558e1-cb5d-41ae-b845-dbe48fb247ec",
+        user_id: "e031657d-ac7c-434d-b61c-22e92359b13c",
       },
     ])
     .select()
@@ -62,11 +62,11 @@ export async function POST(request: NextRequest) {
     JSON.stringify(
       Object.assign({}, data, {
         shortUrl,
-      })
+      }),
     ),
     {
       status: 201,
       headers: { "Content-Type": "application/json" },
-    }
+    },
   );
 }
