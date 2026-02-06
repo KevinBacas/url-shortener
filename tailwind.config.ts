@@ -75,8 +75,7 @@ const config = {
       },
     },
   },
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  plugins: [require("tw-animate-css")],
+  plugins: [],
 } satisfies Config;
 
 export default config;
