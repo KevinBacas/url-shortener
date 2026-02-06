@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-import twAnimateCss from "tw-animate-css";
 
 const config = {
   darkMode: "class",
@@ -76,7 +75,7 @@ const config = {
       },
     },
   },
-  plugins: [twAnimateCss],
+  plugins: [],
 } satisfies Config;
 
 export default config;
