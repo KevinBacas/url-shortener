@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 
 async function getAnalytics() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const response = await fetch(`${baseUrl}/api/analytics`, {
+    const response = await fetch("/api/analytics", {
       cache: "no-store", // Always fetch fresh data
     });
 
