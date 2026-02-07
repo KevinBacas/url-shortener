@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import supabase from "@/utils/supabase/server";
+import supabaseAdmin from "@/utils/supabase/serverAdmin";
 import logger from "@/lib/logger";
 
 export async function GET(
@@ -11,7 +11,8 @@ export async function GET(
   logger.info(`Received GET request for short link ID: ${id}`);
 
   // Fetch the short link data from the database using the slug
-  const { error, data } = await supabase
+  // Use admin client to bypass RLS since redirects are public
+  const { error, data } = await supabaseAdmin
     .from("short_links")
     .select("*")
     .eq("slug", id)
@@ -40,7 +41,8 @@ export async function GET(
   const referrer = request.headers.get("referer");
 
   logger.info(`Tracking click for short link ID: ${data.id}`);
-  const { error: clickError } = await supabase.from("link_clicks").insert([
+  // Use admin client for click tracking since it's anonymous
+  const { error: clickError } = await supabaseAdmin.from("link_clicks").insert([
     {
       short_link_id: data.id,
       user_agent: userAgent,

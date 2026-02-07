@@ -1,12 +1,17 @@
 import { AnalyticsList } from "@/components/analytics-list";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/server";
 import { getAnalyticsData } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic"; // Disable caching for this page
 
 export default async function AnalyticsPage() {
-  const links = await getAnalyticsData();
+  // Create user-scoped Supabase client
+  const supabase = await createClient();
+
+  // Fetch analytics data - RLS will filter to user's links only
+  const links = await getAnalyticsData(supabase);
 
   return (
     <div className="flex min-h-screen flex-col bg-linear-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -22,7 +27,7 @@ export default async function AnalyticsPage() {
               </Link>
             </div>
             <p className="text-muted-foreground">
-              Consultez les statistiques d&apos;utilisation de tous vos liens
+              Consultez les statistiques d&apos;utilisation de vos liens
               raccourcis
             </p>
           </div>

@@ -2,13 +2,14 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Check, Copy, Loader2 } from "lucide-react";
+import { Check, Copy, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 import type { CreateLinkResponse, ApiErrorResponse } from "@/lib/api-types";
 
 const shortenUrl = async (url: string): Promise<string> => {
@@ -36,6 +37,28 @@ export function HomepageForm() {
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+
+    checkAuth();
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +73,37 @@ export function HomepageForm() {
     try {
       setIsLoading(true);
       const result = await shortenUrl(url);
+
+      // Show loading state while checking authentication
+      if (isAuthenticated === null) {
+        return (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        );
+      }
+
+      // Show message if not authenticated
+      if (!isAuthenticated) {
+        return (
+          <Card className="mx-auto max-w-md p-6 text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="rounded-full bg-muted p-3">
+                <Lock className="h-6 w-6 text-muted-foreground" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Connexion requise</h3>
+              <p className="text-sm text-muted-foreground">
+                Vous devez être connecté pour créer des liens raccourcis.
+              </p>
+            </div>
+            <Button asChild className="w-full">
+              <Link href="/login">Se connecter</Link>
+            </Button>
+          </Card>
+        );
+      }
       setShortUrl(result);
       toast("Lien créé !", {
         description: "Votre lien raccourci a été créé avec succès.",
