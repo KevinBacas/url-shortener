@@ -9,8 +9,9 @@ import { Card } from "@/components/ui/card";
 import { Check, Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import type { CreateLinkResponse, ApiErrorResponse } from "@/lib/api-types";
 
-const shortenUrl = async (url: string) => {
+const shortenUrl = async (url: string): Promise<string> => {
   const response = await fetch("/api/", {
     method: "POST",
     headers: {
@@ -20,11 +21,13 @@ const shortenUrl = async (url: string) => {
   });
 
   if (!response.ok) {
-    throw new Error("Erreur lors de la création du lien raccourci");
+    const errorData: ApiErrorResponse = await response.json();
+    throw new Error(
+      errorData.error || "Erreur lors de la création du lien raccourci",
+    );
   }
 
-  const data = await response.json();
-  // Assumes the API returns { shortUrl: string }
+  const data: CreateLinkResponse = await response.json();
   return data.shortUrl;
 };
 
@@ -48,21 +51,9 @@ export function HomepageForm() {
       setIsLoading(true);
       const result = await shortenUrl(url);
       setShortUrl(result);
-
-      // Add to local storage history
-      const history = JSON.parse(localStorage.getItem("urlHistory") || "[]");
-      const newItem = {
-        originalUrl: url,
-        shortUrl: result,
-        createdAt: new Date().toISOString(),
-      };
-      localStorage.setItem(
-        "urlHistory",
-        JSON.stringify([newItem, ...history.slice(0, 9)]),
-      );
-
-      // Trigger history update
-      window.dispatchEvent(new Event("historyUpdated"));
+      toast("Lien créé !", {
+        description: "Votre lien raccourci a été créé avec succès.",
+      });
     } catch (error) {
       toast("Erreur", {
         description: "Impossible de raccourcir cette URL: " + error,

@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
-import supabase from "@/utils/supabase/client";
+import supabase from "@/utils/supabase/server";
 import logger from "@/lib/logger";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
-) {
+): Promise<Response> {
   // Extract the ID from the request parameters
   const id = (await params).id;
   logger.info(`Received GET request for short link ID: ${id}`);
@@ -15,14 +15,12 @@ export async function GET(
     .from("short_links")
     .select("*")
     .eq("slug", id)
-    .single();
+    .maybeSingle();
+
+  // Handle database errors
   if (error) {
     logger.error(`Database error for ID ${id}: ${error.message}`);
-  }
-
-  // Handle errors or if no data is found
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
@@ -31,7 +29,7 @@ export async function GET(
   // If no data is found, return a 404 response
   if (!data || !data.target_url) {
     logger.warn(`Short link not found for ID: ${id}`);
-    return new Response(JSON.stringify({ error: "Route not found" }), {
+    return new Response(JSON.stringify({ error: "Short link not found" }), {
       status: 404,
       headers: { "Content-Type": "application/json" },
     });
@@ -58,8 +56,6 @@ export async function GET(
   }
 
   // Redirect to the target URL
-  if (data.target_url) {
-    logger.info(`Redirecting ID ${id} to target URL: ${data.target_url}`);
-    return Response.redirect(data.target_url, 302);
-  }
+  logger.info(`Redirecting ID ${id} to target URL: ${data.target_url}`);
+  return Response.redirect(data.target_url, 302);
 }

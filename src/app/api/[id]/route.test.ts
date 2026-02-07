@@ -1,26 +1,35 @@
 import { GET } from "./route";
 import logger from "@/lib/logger";
 
-jest.mock("@/utils/supabase/client", () => ({
-  from: (table: string) => {
-    if (table === "link_clicks") {
+jest.mock("@/utils/supabase/server", () => ({
+  __esModule: true,
+  default: {
+    from: (table: string) => {
+      if (table === "link_clicks") {
+        return {
+          insert: () =>
+            Promise.resolve({
+              data: null,
+              error: null,
+            }),
+        };
+      }
       return {
-        insert: () => ({
-          data: null,
-          error: null,
-        }),
-      };
-    }
-    return {
-      select: () => ({
-        eq: () => ({
-          single: () => ({
-            data: { id: 1, slug: "abc123", target_url: "https://example.com" },
-            error: null,
+        select: () => ({
+          eq: () => ({
+            maybeSingle: () =>
+              Promise.resolve({
+                data: {
+                  id: 1,
+                  slug: "abc123",
+                  target_url: "https://example.com",
+                },
+                error: null,
+              }),
           }),
         }),
-      }),
-    };
+      };
+    },
   },
 }));
 
@@ -29,16 +38,22 @@ jest.spyOn(logger, "error").mockImplementation(() => logger);
 jest.spyOn(logger, "warn").mockImplementation(() => logger);
 
 describe("GET /api/[id]", () => {
-  it("returns 302 if db error", async () => {
-    jest.mock("@/utils/supabase/client", () => ({
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            single: () => ({ data: null, error: { message: "db error" } }),
+  it("returns 500 if db error", async () => {
+    jest.resetModules();
+    jest.doMock("@/utils/supabase/server", () => ({
+      __esModule: true,
+      default: {
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              maybeSingle: () =>
+                Promise.resolve({ data: null, error: { message: "db error" } }),
+            }),
           }),
         }),
-      }),
+      },
     }));
+    const { GET: mockedGET } = await import("./route");
     const req = {
       cookies: {},
       nextUrl: {},
@@ -50,18 +65,25 @@ describe("GET /api/[id]", () => {
       clone: () => req,
     } as unknown as import("next/server").NextRequest;
     const params = Promise.resolve({ id: "abc123" });
-    const res = await GET(req, { params });
-    expect(res?.status).toBe(302);
+    const res = await mockedGET(req, { params });
+    expect(res?.status).toBe(500);
   });
 
-  it("returns 302 if not found", async () => {
-    jest.mock("@/utils/supabase/client", () => ({
-      from: () => ({
-        select: () => ({
-          eq: () => ({ single: () => ({ data: null, error: null }) }),
+  it("returns 404 if not found", async () => {
+    jest.resetModules();
+    jest.doMock("@/utils/supabase/server", () => ({
+      __esModule: true,
+      default: {
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              maybeSingle: () => Promise.resolve({ data: null, error: null }),
+            }),
+          }),
         }),
-      }),
+      },
     }));
+    const { GET: mockedGET } = await import("./route");
     const req = {
       cookies: {},
       nextUrl: {},
@@ -73,8 +95,8 @@ describe("GET /api/[id]", () => {
       clone: () => req,
     } as unknown as import("next/server").NextRequest;
     const params = Promise.resolve({ id: "notfound" });
-    const res = await GET(req, { params });
-    expect(res?.status).toBe(302);
+    const res = await mockedGET(req, { params });
+    expect(res?.status).toBe(404);
   });
 
   it("redirects if found", async () => {

@@ -49,11 +49,14 @@ cp .env.example .env.local
 # Add your Supabase credentials
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_KEY=your-service-key
 
 # Optional: Customize slug generation
 CUSTOM_NANOID_ALPHABET=0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
 CUSTOM_NANOID_LENGTH=6
 ```
+
+**⚠️ Important**: Keep `SUPABASE_SERVICE_KEY` secret! This key has admin privileges and should only be used in server-side code. Never expose it to the client.
 
 4. Set up the database schema in Supabase:
 ```sql
@@ -107,19 +110,31 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes
 │   │   ├── route.ts       # POST /api - Create short link
-│   │   └── [id]/         # GET /api/[id] - Redirect
+│   │   ├── [id]/         # GET /api/[id] - Redirect
+│   │   └── analytics/    # GET /api/analytics - Analytics data
+│   ├── analytics/         # Analytics page (Server Component)
+│   │   ├── page.tsx      # Analytics Server Component
+│   │   └── loading.tsx   # Loading state
+│   ├── error.tsx          # Global error boundary
+│   ├── not-found.tsx      # 404 page
 │   ├── layout.tsx         # Root layout
 │   └── page.tsx          # Homepage
 ├── components/            # React components
 │   ├── ui/               # Shadcn UI components (DO NOT MODIFY)
-│   └── homepage-form.tsx # URL shortening form
+│   ├── analytics-list.tsx # Analytics display (Client Component)
+│   └── homepage-form.tsx # URL shortening form (Client Component)
 ├── lib/                  # Core utilities
+│   ├── analytics.ts      # Analytics data fetching
+│   ├── api-types.ts      # API response types
+│   ├── env.ts            # Environment variable validation
 │   ├── logger.ts         # Winston logger
 │   └── utils.ts          # Helper functions
-└── utils/                # App-specific utilities
-    └── supabase/         # Supabase client
-types/                    # TypeScript definitions
-└── database.types.ts    # Supabase generated types
+└── utils/                # Third-party integrations
+    └── supabase/         # Supabase clients
+        ├── client.ts     # Browser client (anon key)
+        └── server.ts     # Server client (service key)
+types/                    # Generated TypeScript definitions
+└── database.types.ts    # Supabase generated types + aliases
 ```
 
 ## GitHub Copilot Integration
@@ -193,10 +208,16 @@ Redirect to the original URL and track the click.
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes | - |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Yes | - |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key (client-side) | Yes | - |
+| `SUPABASE_SERVICE_KEY` | Supabase service key (server-side only) | Yes | - |
 | `CUSTOM_NANOID_ALPHABET` | Characters for slug generation | No | `0-9a-zA-Z` |
 | `CUSTOM_NANOID_LENGTH` | Length of generated slugs | No | `6` |
 | `NODE_ENV` | Environment mode | No | `development` |
+
+**Security Note**: The `SUPABASE_SERVICE_KEY` has admin privileges and bypasses Row Level Security. It should:
+- Only be used in server-side code (API routes, Server Components, Server Actions)
+- Never be exposed to the client (no `NEXT_PUBLIC_` prefix)
+- Be kept secret in production environments
 
 ## Deployment
 

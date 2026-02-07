@@ -9,15 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { Database } from "@/types/database.types";
-
-type ShortLink = Database["public"]["Tables"]["short_links"]["Row"];
-type LinkClick = Database["public"]["Tables"]["link_clicks"]["Row"];
-
-interface LinkWithClicks extends ShortLink {
-  click_count: number;
-  clicks: LinkClick[];
-}
+import type { LinkWithClicks } from "@/lib/analytics";
 
 interface AnalyticsListProps {
   links: LinkWithClicks[];
