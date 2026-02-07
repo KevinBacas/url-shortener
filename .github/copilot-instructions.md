@@ -20,19 +20,33 @@ This is a Next.js 16+ URL shortener application using the App Router, TypeScript
 ```
 src/
 ├── app/              # Next.js App Router pages and API routes
-│   ├── api/         # API endpoints (POST /api, GET /api/[id])
+│   ├── api/         # API endpoints
+│   │   ├── route.ts       # POST /api - Create short link
+│   │   ├── [id]/         # GET /api/[id] - Redirect
+│   │   └── analytics/    # GET /api/analytics - Analytics data
+│   ├── analytics/   # Analytics page
+│   │   ├── page.tsx      # Analytics Server Component
+│   │   └── loading.tsx   # Loading state
+│   ├── error.tsx    # Global error boundary
+│   ├── not-found.tsx # 404 page
 │   ├── layout.tsx   # Root layout
 │   └── page.tsx     # Homepage
 ├── components/      # React components
 │   ├── ui/         # Shadcn UI components (DO NOT MODIFY)
-│   └── *.tsx       # Custom components
+│   ├── analytics-list.tsx # Analytics display (Client Component)
+│   └── homepage-form.tsx  # URL shortening form (Client Component)
 ├── lib/            # Core utilities
-│   ├── logger.ts   # Winston logger configuration
-│   └── utils.ts    # Helper functions
-└── utils/          # App-specific utilities
+│   ├── analytics.ts  # Analytics data fetching
+│   ├── api-types.ts  # API response types
+│   ├── env.ts        # Environment variable validation
+│   ├── logger.ts     # Winston logger configuration
+│   └── utils.ts      # Helper functions
+└── utils/          # Third-party integrations
     └── supabase/   # Supabase client configuration
-types/              # TypeScript definitions
-└── database.types.ts  # Supabase generated types
+        ├── client.ts # Browser client (anon key)
+        └── server.ts # Server client (service key)
+types/              # Generated TypeScript definitions
+└── database.types.ts  # Supabase generated types + aliases
 ```
 
 ## Database Schema
@@ -55,12 +69,14 @@ types/              # TypeScript definitions
 - `user_agent`: string (nullable)
 - `referrer`: string (nullable)
 - `created_at`: timestamp
+  lib/api-types
 
 ### Type Usage
 
 - Always use types from `types/database.types.ts`
-- Use `Database['public']['Tables']['table_name']['Row']` for row types
-- Use `Database['public']['Tables']['table_name']['Insert']` for insert operations
+- Use simplified type aliases: `ShortLink`, `ShortLinkInsert`, `LinkClick`, `LinkClickInsert`
+- Use API response types from `src/types/api.ts` in client-side code
+- For complex types, use `LinkWithClicks` from `@/lib/analytics`
 
 ## Coding Standards
 
@@ -80,13 +96,14 @@ types/              # TypeScript definitions
 - Use `NextRequest` and `NextResponse` types
 - Return JSON responses with proper status codes and headers
 - Log all requests and errors using the Winston logger
+- **CRITICAL**: Import Supabase from `@/utils/supabase/server` in API routes, not from `client`
 
 **Example Pattern:**
 
 ```typescript
 import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
-import supabase from "@/utils/supabase/client";
+import supabase from "@/utils/supabase/server"; // Use server client in API routes
 
 export async function POST(request: NextRequest) {
   try {
@@ -151,21 +168,28 @@ logger.error(`Error occurred: ${error.message}`);
 ### Slug Generation
 
 - Use `nanoid` with custom alphabet for generating short URL slugs
-- Read configuration from environment variables:
-  - `CUSTOM_NANOID_ALPHABET` (default: alphanumeric)
-  - `CUSTOM_NANOID_LENGTH` (default: 6)
+- Use centralized configuration from `@/lib/env`
+- Implement collision detection with retry logic
 
 **Pattern:**
 
 ```typescript
 import { customAlphabet } from "nanoid";
+import { nanoidConfig } from "@/lib/env";
 
-const nanoid = customAlphabet(
-  process.env.CUSTOM_NANOID_ALPHABET ||
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  parseInt(process.env.CUSTOM_NANOID_LENGTH ?? "6"),
-);
+const nanoid = customAlphabet(nanoidConfig.alphabet, nanoidConfig.length);
 const slug = nanoid();
+
+// For slug collision handling:
+const { data: existing } = await supabase
+  .from("short_links")
+  .select("slug")
+  .eq("slug", slug)
+  .maybeSingle();
+
+if (!existing) {
+  // Slug is unique, proceed
+}
 ```
 
 ### Client Components
@@ -177,10 +201,16 @@ const slug = nanoid();
 
 ### Supabase Integration
 
-- Import Supabase client from `@/utils/supabase/client`
+- **Server-side**: Import from `@/utils/supabase/server` (uses service key with admin privileges)
+  - Use in: API routes, Server Components, Server Actions
+  - Has full access, bypasses Row Level Security
+- **Client-side**: Import from `@/utils/supabase/client` (uses anonymous key)
+  - Use in: Client Components, browser code
+  - Respects Row Level Security policies
 - Always handle errors from Supabase operations
 - Use the `.select()` method to return inserted/updated data
 - Use `.single()` when expecting one result
+- Use `.maybeSingle()` when result might not exist (avoids throwing on no results)
 
 ## Testing Requirements
 
@@ -265,10 +295,13 @@ This folder contains pre-built Shadcn UI components. These are third-party compo
 Required environment variables:
 
 - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous key
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous key (client-side)
+- `SUPABASE_SERVICE_KEY`: Supabase service key (server-side only, **never expose to client**)
 - `CUSTOM_NANOID_ALPHABET`: Custom alphabet for slug generation (optional)
 - `CUSTOM_NANOID_LENGTH`: Length of generated slugs (optional, default: 6)
 - `NODE_ENV`: Environment mode (development/production)
+
+**Security Note**: `SUPABASE_SERVICE_KEY` has admin privileges. Only use in server-side code.
 
 ## Git Workflow
 

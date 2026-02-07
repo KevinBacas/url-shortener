@@ -2,20 +2,48 @@ jest.mock("nanoid", () => ({
   customAlphabet: () => () => "abc123",
 }));
 
+jest.mock("@/lib/env", () => ({
+  serverEnv: {
+    supabaseUrl: "http://localhost:54321",
+    supabaseServiceKey: "test-service-key",
+  },
+  clientEnv: {
+    supabaseUrl: "http://localhost:54321",
+    supabaseAnonKey: "test-anon-key",
+  },
+  nanoidConfig: {
+    alphabet: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    length: 6,
+  },
+}));
+
 import { POST } from "./route";
 import logger from "@/lib/logger";
 
-jest.mock("@/utils/supabase/client", () => ({
-  from: () => ({
-    insert: () => ({
+jest.mock("@/utils/supabase/server", () => ({
+  __esModule: true,
+  default: {
+    from: () => ({
       select: () => ({
-        single: () => ({
-          data: [{ slug: "abc123", target_url: "https://example.com" }],
-          error: null,
+        eq: () => ({
+          maybeSingle: () =>
+            Promise.resolve({
+              data: null,
+              error: null,
+            }),
+        }),
+      }),
+      insert: () => ({
+        select: () => ({
+          single: () =>
+            Promise.resolve({
+              data: { slug: "abc123", target_url: "https://example.com" },
+              error: null,
+            }),
         }),
       }),
     }),
-  }),
+  },
 }));
 
 jest.spyOn(logger, "info").mockImplementation(() => logger);
@@ -55,6 +83,24 @@ describe("POST /api", () => {
     } as unknown as import("next/server").NextRequest;
     const res = await POST(req);
     expect(res.status).toBe(400);
+  });
+
+  it("returns 400 if url format is invalid", async () => {
+    const req = {
+      json: async () => ({ url: "not-a-valid-url" }),
+      cookies: {},
+      nextUrl: {},
+      page: {},
+      ua: "",
+      method: "POST",
+      url: "",
+      headers: new Headers(),
+      clone: () => req,
+    } as unknown as import("next/server").NextRequest;
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toContain("Invalid URL format");
   });
 
   it("returns 200 and short link if url is provided", async () => {

@@ -234,6 +234,19 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never;
 
+// Convenient type aliases for common database types
+export type ShortLink = Database["public"]["Tables"]["short_links"]["Row"];
+export type ShortLinkInsert =
+  Database["public"]["Tables"]["short_links"]["Insert"];
+export type ShortLinkUpdate =
+  Database["public"]["Tables"]["short_links"]["Update"];
+
+export type LinkClick = Database["public"]["Tables"]["link_clicks"]["Row"];
+export type LinkClickInsert =
+  Database["public"]["Tables"]["link_clicks"]["Insert"];
+export type LinkClickUpdate =
+  Database["public"]["Tables"]["link_clicks"]["Update"];
+
 export const Constants = {
   graphql_public: {
     Enums: {},
