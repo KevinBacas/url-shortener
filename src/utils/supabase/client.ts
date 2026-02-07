@@ -1,18 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 import { Database } from "../../../types/database.types";
+import { clientEnv } from "@/lib/env";
 
-const supabaseUrl = process.env.SUPABASE_URL;
-if (!supabaseUrl) {
-  throw new Error("Missing SUPABASE_URL");
+/**
+ * Creates a browser-side Supabase client with automatic session management
+ * Uses anonymous key and respects Row Level Security based on user session
+ * Sessions are automatically stored in browser cookies
+ * Safe to use in Client Components and browser code
+ */
+export function createClient() {
+  return createBrowserClient<Database>(
+    clientEnv.supabaseUrl,
+    clientEnv.supabaseAnonKey,
+  );
 }
-
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
-if (!supabaseServiceKey) {
-  throw new Error("Missing SUPABASE_SERVICE_KEY");
-}
-
-// Create a single supabase client for interacting with your database
-const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey);
-
-// Export the supabase client for use in other parts of the application
-export default supabase;
