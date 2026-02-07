@@ -2,16 +2,26 @@ import { GET } from "./route";
 import logger from "@/lib/logger";
 
 jest.mock("@/utils/supabase/client", () => ({
-  from: () => ({
-    select: () => ({
-      eq: () => ({
-        single: () => ({
-          data: { slug: "abc123", target_url: "https://example.com" },
+  from: (table: string) => {
+    if (table === "link_clicks") {
+      return {
+        insert: () => ({
+          data: null,
           error: null,
         }),
+      };
+    }
+    return {
+      select: () => ({
+        eq: () => ({
+          single: () => ({
+            data: { id: 1, slug: "abc123", target_url: "https://example.com" },
+            error: null,
+          }),
+        }),
       }),
-    }),
-  }),
+    };
+  },
 }));
 
 jest.spyOn(logger, "info").mockImplementation(() => logger);
