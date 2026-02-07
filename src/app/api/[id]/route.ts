@@ -4,7 +4,7 @@ import logger from "@/lib/logger";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   // Extract the ID from the request parameters
   const id = (await params).id;
@@ -35,6 +35,26 @@ export async function GET(
       status: 404,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  // Track the click
+  const userAgent = request.headers.get("user-agent");
+  const referrer = request.headers.get("referer");
+
+  logger.info(`Tracking click for short link ID: ${data.id}`);
+  const { error: clickError } = await supabase.from("link_clicks").insert([
+    {
+      short_link_id: data.id,
+      user_agent: userAgent,
+      referrer: referrer,
+      clicked_at: new Date().toISOString(),
+    },
+  ]);
+
+  if (clickError) {
+    logger.error(`Failed to track click for ID ${id}: ${clickError.message}`);
+  } else {
+    logger.info(`Click tracked successfully for ID ${id}`);
   }
 
   // Redirect to the target URL

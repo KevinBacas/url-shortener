@@ -14,6 +14,41 @@ export type Database = {
   };
   public: {
     Tables: {
+      link_clicks: {
+        Row: {
+          clicked_at: string;
+          created_at: string;
+          id: number;
+          referrer: string | null;
+          short_link_id: number;
+          user_agent: string | null;
+        };
+        Insert: {
+          clicked_at?: string;
+          created_at?: string;
+          id?: number;
+          referrer?: string | null;
+          short_link_id: number;
+          user_agent?: string | null;
+        };
+        Update: {
+          clicked_at?: string;
+          created_at?: string;
+          id?: number;
+          referrer?: string | null;
+          short_link_id?: number;
+          user_agent?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "link_clicks_short_link_id_fkey";
+            columns: ["short_link_id"];
+            isOneToOne: false;
+            referencedRelation: "short_links";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       short_links: {
         Row: {
           created_at: string;
