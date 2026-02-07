@@ -1,27 +1,41 @@
+"use client";
+
 import { AnalyticsList } from "@/components/analytics-list";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
-async function getAnalytics() {
-  try {
-    const response = await fetch("/api/analytics", {
-      cache: "no-store", // Always fetch fresh data
-    });
+export default function AnalyticsPage() {
+  const [links, setLinks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-    if (!response.ok) {
-      console.error("Failed to fetch analytics:", response.statusText);
-      return [];
-    }
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/analytics", {
+          cache: "no-store",
+        });
 
-    return response.json();
-  } catch (error) {
-    console.error("Error fetching analytics:", error);
-    return [];
-  }
-}
+        if (!response.ok) {
+          console.error("Failed to fetch analytics:", response.statusText);
+          setLinks([]);
+          return;
+        }
 
-export default async function AnalyticsPage() {
-  const links = await getAnalytics();
+        const data = await response.json();
+        setLinks(data);
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+        setLinks([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -42,7 +56,13 @@ export default async function AnalyticsPage() {
             </p>
           </div>
 
-          <AnalyticsList links={links} />
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <AnalyticsList links={links} />
+          )}
         </section>
       </main>
     </div>
