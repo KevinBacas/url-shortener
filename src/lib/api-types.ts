@@ -28,3 +28,11 @@ export type AnalyticsResponse = LinkWithClicksResponse[];
 export interface ApiErrorResponse {
   error: string;
 }
+
+/**
+ * Unauthorized response (401)
+ * Used when authentication is required but not provided
+ */
+export interface UnauthorizedResponse {
+  error: "Authentication required";
+}

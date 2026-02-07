@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { UserProfile } from "@/components/user-profile";
+import Link from "next/link";
 
 import "./globals.css";
 
@@ -29,7 +31,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <header className="border-b">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/" className="text-xl font-bold hover:opacity-80">
+              URL Shortener
+            </Link>
+            <nav className="flex items-center gap-4">
+              <Link
+                href="/analytics"
+                className="text-sm font-medium hover:underline"
+              >
+                Analytics
+              </Link>
+              <UserProfile />
+            </nav>
+          </div>
+        </header>
+        <main>{children}</main>
         <Toaster />
       </body>
     </html>

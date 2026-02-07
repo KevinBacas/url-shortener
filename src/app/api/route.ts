@@ -1,12 +1,31 @@
 import { NextRequest } from "next/server";
 import { customAlphabet } from "nanoid";
-import supabase from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import logger from "@/lib/logger";
 import { nanoidConfig } from "@/lib/env";
 
 const MAX_SLUG_GENERATION_ATTEMPTS = 5;
 
 export async function POST(request: NextRequest) {
+  // Create user-scoped Supabase client
+  const supabase = await createClient();
+
+  // Check if user is authenticated
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    logger.warn("Unauthorized attempt to create short link");
+    return new Response(JSON.stringify({ error: "Authentication required" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  logger.info(`User ${user.id} attempting to create short link`);
+
   // Extract URL from the request body
   let url: string | undefined;
   try {

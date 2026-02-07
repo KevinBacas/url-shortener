@@ -6,6 +6,7 @@
 
 interface ServerEnv {
   supabaseUrl: string;
+  supabaseAnonKey: string;
   supabaseServiceKey: string;
 }
 
@@ -34,6 +35,9 @@ export const serverEnv: ServerEnv = {
   supabaseUrl:
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     (isBuildTime ? buildTimeFallback : ""),
+  supabaseAnonKey:
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    (isBuildTime ? buildTimeKey : ""),
   supabaseServiceKey:
     process.env.SUPABASE_SERVICE_KEY || (isBuildTime ? buildTimeKey : ""),
 };
@@ -68,6 +72,9 @@ export const nanoidConfig: NanoidConfig = {
 function validateServerEnv(): void {
   const missing: string[] = [];
 
+  if (!serverEnv.supabaseAnonKey) {
+    missing.push("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  }
   if (!serverEnv.supabaseUrl) {
     missing.push("NEXT_PUBLIC_SUPABASE_URL");
   }

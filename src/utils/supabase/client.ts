@@ -1,15 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 import { Database } from "../../../types/database.types";
 import { clientEnv } from "@/lib/env";
 
 /**
- * Client-side Supabase client for browser use
- * Uses anonymous key and respects Row Level Security policies
- * Safe to use in client components and browser code
+ * Creates a browser-side Supabase client with automatic session management
+ * Uses anonymous key and respects Row Level Security based on user session
+ * Sessions are automatically stored in browser cookies
+ * Safe to use in Client Components and browser code
  */
-const supabase = createClient<Database>(
-  clientEnv.supabaseUrl,
-  clientEnv.supabaseAnonKey,
-);
-
-export default supabase;
+export function createClient() {
+  return createBrowserClient<Database>(
+    clientEnv.supabaseUrl,
+    clientEnv.supabaseAnonKey,
+  );
+}

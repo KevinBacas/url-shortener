@@ -1,6 +1,6 @@
-import supabase from "@/utils/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import logger from "@/lib/logger";
-import type { ShortLink, LinkClick } from "@/types/database.types";
+import type { ShortLink, LinkClick, Database } from "@/types/database.types";
 
 export interface LinkWithClicks extends ShortLink {
   click_count: number;
@@ -8,16 +8,21 @@ export interface LinkWithClicks extends ShortLink {
 }
 
 /**
- * Fetches all short links with their click statistics from the database
+ * Fetches short links with their click statistics from the database
  * Uses optimized single query with nested select to avoid N+1 pattern
+ * With RLS enabled, only returns links belonging to the authenticated user
+ * @param supabaseClient - User-scoped Supabase client (respects RLS)
  * @returns Array of links with their clicks and click count
  */
-export async function getAnalyticsData(): Promise<LinkWithClicks[]> {
-  logger.info("Fetching analytics data for all short links");
+export async function getAnalyticsData(
+  supabaseClient: SupabaseClient<Database>,
+): Promise<LinkWithClicks[]> {
+  logger.info("Fetching analytics data for short links");
 
   // Use nested select to fetch links and clicks in a single query
   // This avoids the N+1 query problem
-  const { data, error } = await supabase
+  // RLS policies will automatically filter to user's links only
+  const { data, error } = await supabaseClient
     .from("short_links")
     .select(
       `
