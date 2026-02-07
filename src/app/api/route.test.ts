@@ -5,6 +5,7 @@ jest.mock("nanoid", () => ({
 jest.mock("@/lib/env", () => ({
   serverEnv: {
     supabaseUrl: "http://localhost:54321",
+    supabaseAnonKey: "test-anon-key",
     supabaseServiceKey: "test-service-key",
   },
   clientEnv: {
@@ -21,8 +22,18 @@ import { POST } from "./route";
 import logger from "@/lib/logger";
 
 jest.mock("@/utils/supabase/server", () => ({
-  __esModule: true,
-  default: {
+  createClient: jest.fn(async () => ({
+    auth: {
+      getUser: jest.fn().mockResolvedValue({
+        data: {
+          user: {
+            id: "test-user-id",
+            email: "test@example.com",
+          },
+        },
+        error: null,
+      }),
+    },
     from: () => ({
       select: () => ({
         eq: () => ({
@@ -37,13 +48,17 @@ jest.mock("@/utils/supabase/server", () => ({
         select: () => ({
           single: () =>
             Promise.resolve({
-              data: { slug: "abc123", target_url: "https://example.com" },
+              data: {
+                slug: "abc123",
+                target_url: "https://example.com",
+                user_id: "test-user-id",
+              },
               error: null,
             }),
         }),
       }),
     }),
-  },
+  })),
 }));
 
 jest.spyOn(logger, "info").mockImplementation(() => logger);

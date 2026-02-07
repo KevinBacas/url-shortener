@@ -38,8 +38,18 @@ const mockShortLinksWithClicks = [
 ];
 
 jest.mock("@/utils/supabase/server", () => ({
-  __esModule: true,
-  default: {
+  createClient: jest.fn(async () => ({
+    auth: {
+      getUser: jest.fn().mockResolvedValue({
+        data: {
+          user: {
+            id: "test-user-id",
+            email: "test@example.com",
+          },
+        },
+        error: null,
+      }),
+    },
     from: jest.fn(() => ({
       select: () => ({
         order: () =>
@@ -49,7 +59,7 @@ jest.mock("@/utils/supabase/server", () => ({
           }),
       }),
     })),
-  },
+  })),
 }));
 
 jest.spyOn(logger, "info").mockImplementation(() => logger);
@@ -84,8 +94,18 @@ describe("GET /api/analytics", () => {
   it("returns empty array when no links exist", async () => {
     jest.resetModules();
     jest.doMock("@/utils/supabase/server", () => ({
-      __esModule: true,
-      default: {
+      createClient: jest.fn(async () => ({
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: {
+              user: {
+                id: "test-user-id",
+                email: "test@example.com",
+              },
+            },
+            error: null,
+          }),
+        },
         from: () => ({
           select: () => ({
             order: () =>
@@ -95,7 +115,7 @@ describe("GET /api/analytics", () => {
               }),
           }),
         }),
-      },
+      })),
     }));
 
     const { GET: mockedGET } = await import("./route");
@@ -109,8 +129,18 @@ describe("GET /api/analytics", () => {
   it("returns 500 if database error occurs", async () => {
     jest.resetModules();
     jest.doMock("@/utils/supabase/server", () => ({
-      __esModule: true,
-      default: {
+      createClient: jest.fn(async () => ({
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: {
+              user: {
+                id: "test-user-id",
+                email: "test@example.com",
+              },
+            },
+            error: null,
+          }),
+        },
         from: () => ({
           select: () => ({
             order: () =>
@@ -120,7 +150,7 @@ describe("GET /api/analytics", () => {
               }),
           }),
         }),
-      },
+      })),
     }));
 
     const { GET: mockedGET } = await import("./route");

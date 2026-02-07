@@ -1,7 +1,16 @@
-import { GET } from "./route";
-import logger from "@/lib/logger";
+jest.mock("@/lib/env", () => ({
+  serverEnv: {
+    supabaseUrl: "http://localhost:54321",
+    supabaseAnonKey: "test-anon-key",
+    supabaseServiceKey: "test-service-key",
+  },
+  clientEnv: {
+    supabaseUrl: "http://localhost:54321",
+    supabaseAnonKey: "test-anon-key",
+  },
+}));
 
-jest.mock("@/utils/supabase/server", () => ({
+jest.mock("@/utils/supabase/serverAdmin", () => ({
   __esModule: true,
   default: {
     from: (table: string) => {
@@ -33,6 +42,9 @@ jest.mock("@/utils/supabase/server", () => ({
   },
 }));
 
+import { GET } from "./route";
+import logger from "@/lib/logger";
+
 jest.spyOn(logger, "info").mockImplementation(() => logger);
 jest.spyOn(logger, "error").mockImplementation(() => logger);
 jest.spyOn(logger, "warn").mockImplementation(() => logger);
@@ -40,7 +52,7 @@ jest.spyOn(logger, "warn").mockImplementation(() => logger);
 describe("GET /api/[id]", () => {
   it("returns 500 if db error", async () => {
     jest.resetModules();
-    jest.doMock("@/utils/supabase/server", () => ({
+    jest.doMock("@/utils/supabase/serverAdmin", () => ({
       __esModule: true,
       default: {
         from: () => ({
@@ -71,7 +83,7 @@ describe("GET /api/[id]", () => {
 
   it("returns 404 if not found", async () => {
     jest.resetModules();
-    jest.doMock("@/utils/supabase/server", () => ({
+    jest.doMock("@/utils/supabase/serverAdmin", () => ({
       __esModule: true,
       default: {
         from: () => ({
