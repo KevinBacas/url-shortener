@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import logger from "@/lib/logger";
 import supabase from "@/utils/supabase/client";
 import type { Database } from "@/types/database.types";
@@ -15,7 +15,7 @@ interface LinkWithClicks extends ShortLink {
  * GET /api/analytics
  * Retrieves all short links with their click statistics
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     logger.info("Fetching analytics data for all short links");
 

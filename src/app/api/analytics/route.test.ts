@@ -71,18 +71,7 @@ jest.spyOn(logger, "warn").mockImplementation(() => logger);
 
 describe("GET /api/analytics", () => {
   it("returns analytics data with click counts", async () => {
-    const req = {
-      cookies: {},
-      nextUrl: {},
-      page: {},
-      ua: "",
-      method: "GET",
-      url: "http://localhost/api/analytics",
-      headers: new Headers(),
-      clone: () => req,
-    } as unknown as import("next/server").NextRequest;
-
-    const res = await GET(req);
+    const res = await GET();
     expect(res.status).toBe(200);
 
     const data = await res.json();
@@ -116,18 +105,7 @@ describe("GET /api/analytics", () => {
       }),
     }));
 
-    const req = {
-      cookies: {},
-      nextUrl: {},
-      page: {},
-      ua: "",
-      method: "GET",
-      url: "http://localhost/api/analytics",
-      headers: new Headers(),
-      clone: () => req,
-    } as unknown as import("next/server").NextRequest;
-
-    const res = await GET(req);
+    const res = await GET();
     expect(res.status).toBe(200);
 
     const data = await res.json();
@@ -145,18 +123,7 @@ describe("GET /api/analytics", () => {
       }),
     }));
 
-    const req = {
-      cookies: {},
-      nextUrl: {},
-      page: {},
-      ua: "",
-      method: "GET",
-      url: "http://localhost/api/analytics",
-      headers: new Headers(),
-      clone: () => req,
-    } as unknown as import("next/server").NextRequest;
-
-    const res = await GET(req);
+    const res = await GET();
     expect(res.status).toBe(500);
 
     const data = await res.json();
@@ -192,18 +159,7 @@ describe("GET /api/analytics", () => {
       return {};
     });
 
-    const req = {
-      cookies: {},
-      nextUrl: {},
-      page: {},
-      ua: "",
-      method: "GET",
-      url: "http://localhost/api/analytics",
-      headers: new Headers(),
-      clone: () => req,
-    } as unknown as import("next/server").NextRequest;
-
-    const res = await GET(req);
+    const res = await GET();
     expect(res.status).toBe(500);
 
     const data = await res.json();
