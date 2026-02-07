@@ -58,7 +58,7 @@ export function HomepageForm() {
       };
       localStorage.setItem(
         "urlHistory",
-        JSON.stringify([newItem, ...history.slice(0, 9)])
+        JSON.stringify([newItem, ...history.slice(0, 9)]),
       );
 
       // Trigger history update
@@ -131,6 +131,15 @@ export function HomepageForm() {
           </Button>
         </Card>
       )}
+
+      <div className="text-center pt-4">
+        <Link
+          href="/analytics"
+          className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+        >
+          Voir les statistiques de tous les liens →
+        </Link>
+      </div>
     </div>
   );
 }
