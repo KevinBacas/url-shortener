@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { UserProfile } from "@/components/user-profile";
+import { Providers } from "./providers";
 import Link from "next/link";
 
 import "./globals.css";
@@ -27,28 +28,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <header className="border-b">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold hover:opacity-80">
-              URL Shortener
-            </Link>
-            <nav className="flex items-center gap-4">
-              <Link
-                href="/analytics"
-                className="text-sm font-medium hover:underline"
-              >
-                Analytics
+        <Providers>
+          <header>
+            <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+              <Link href="/" className="text-xl font-bold hover:opacity-80">
+                URL Shortener
               </Link>
-              <UserProfile />
-            </nav>
-          </div>
-        </header>
-        <main>{children}</main>
-        <Toaster />
+              <nav className="flex items-center gap-4">
+                <Link
+                  href="/analytics"
+                  className="text-sm font-medium hover:underline"
+                >
+                  Analytics
+                </Link>
+                <UserProfile />
+              </nav>
+            </div>
+          </header>
+          <main>{children}</main>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

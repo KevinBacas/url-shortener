@@ -2,15 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Button, Input, Card, CardHeader, CardBody } from "@heroui/react";
 import { toast } from "sonner";
 import { Mail } from "lucide-react";
 
@@ -54,12 +46,12 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>
+        <h2 className="text-2xl font-semibold">Welcome back</h2>
+        <p className="text-sm text-default-500">
           Enter your email to receive a magic link to sign in
-        </CardDescription>
+        </p>
       </CardHeader>
-      <CardContent>
+      <CardBody>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label
@@ -86,7 +78,7 @@ export function LoginForm() {
             {loading ? "Sending magic link..." : "Send magic link"}
           </Button>
         </form>
-      </CardContent>
+      </CardBody>
     </Card>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button, Card, CardHeader, CardBody } from "@heroui/react";
 import { AlertCircle } from "lucide-react";
 
 export default function Error({
@@ -18,15 +17,15 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-destructive" />
-            <CardTitle>Une erreur est survenue</CardTitle>
+            <h2 className="text-xl font-semibold">Une erreur est survenue</h2>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardBody className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Désolé, une erreur inattendue s&apos;est produite. Veuillez
             réessayer.
@@ -37,18 +36,18 @@ export default function Error({
             </p>
           )}
           <div className="flex gap-2">
-            <Button onClick={reset} className="flex-1">
+            <Button onPress={reset} className="flex-1">
               Réessayer
             </Button>
             <Button
-              variant="outline"
-              onClick={() => (window.location.href = "/")}
+              variant="bordered"
+              onPress={() => (window.location.href = "/")}
               className="flex-1"
             >
               Retour à l&apos;accueil
             </Button>
           </div>
-        </CardContent>
+        </CardBody>
       </Card>
     </div>
   );

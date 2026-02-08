@@ -11,7 +11,7 @@ This is a Next.js 16+ URL shortener application using the App Router, TypeScript
 - **Database**: Supabase (PostgreSQL)
 - **Logging**: Winston
 - **Testing**: Jest + React Testing Library
-- **UI Components**: Shadcn UI + Radix UI
+- **UI Components**: HeroUI (formerly NextUI)
 - **Styling**: Tailwind CSS v4
 - **ID Generation**: Nanoid (custom alphabet for slugs)
 
@@ -32,9 +32,11 @@ src/
 │   ├── layout.tsx   # Root layout
 │   └── page.tsx     # Homepage
 ├── components/      # React components
-│   ├── ui/         # Shadcn UI components (DO NOT MODIFY)
+│   ├── ui/         # UI components (sonner toast)
 │   ├── analytics-list.tsx # Analytics display (Client Component)
-│   └── homepage-form.tsx  # URL shortening form (Client Component)
+│   ├── homepage-form.tsx  # URL shortening form (Client Component)
+│   ├── login-form.tsx     # Login form (Client Component)
+│   └── user-profile.tsx   # User profile display (Client Component)
 ├── lib/            # Core utilities
 │   ├── analytics.ts  # Analytics data fetching
 │   ├── api-types.ts  # API response types
@@ -263,16 +265,16 @@ describe("POST /api", () => {
 - Avoid inline styles; prefer Tailwind utilities
 - Use `cn()` utility from `@/lib/utils` for conditional class merging
 
-## Folder Exclusions
+## HeroUI Components
 
-### ⚠️ CRITICAL: Shadcn UI Components
-
-**DO NOT modify, suggest changes to, or generate code for files in `src/components/ui/`**
-
-This folder contains pre-built Shadcn UI components. These are third-party components that should remain unchanged. If modifications are needed:
-
-1. Create a wrapper component in `src/components/`
-2. Import the UI component and extend it there
+- Import UI components from `@heroui/react`
+- All HeroUI components are client components (require "use client" directive)
+- Common components: Button, Input, Card, CardHeader, CardBody
+- Button variants: `solid` (default), `bordered`, `light`, `flat`, `ghost`, `shadow`
+- Use `isIconOnly` prop for icon-only buttons
+- Use `as` prop for polymorphic rendering (e.g., `<Button as={Link}>`)
+- Card structure: Use CardHeader and CardBody (not CardContent)
+- For custom styling, use `className` prop with Tailwind classes
 
 ## Accessibility
 
@@ -465,7 +467,7 @@ Before every commit:
 import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
 import supabase from "@/utils/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button, Input, Card } from "@heroui/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 ```

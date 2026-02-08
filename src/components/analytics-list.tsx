@@ -1,14 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, Card, CardHeader, CardBody } from "@heroui/react";
 import type { LinkWithClicks } from "@/lib/analytics";
 
 interface AnalyticsListProps {
@@ -68,12 +61,12 @@ export function AnalyticsList({ links }: AnalyticsListProps) {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <CardTitle className="text-lg font-mono">
+                  <h3 className="text-lg font-mono font-semibold">
                     /{link.slug}
-                  </CardTitle>
-                  <CardDescription className="mt-1">
+                  </h3>
+                  <p className="text-sm text-default-500 mt-1">
                     {link.target_url}
-                  </CardDescription>
+                  </p>
                 </div>
                 <div className="flex flex-col items-end gap-2 ml-4">
                   <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">
@@ -83,7 +76,7 @@ export function AnalyticsList({ links }: AnalyticsListProps) {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardBody>
               <div className="text-sm text-muted-foreground mb-4">
                 Créé le {formatDate(link.created_at)}
               </div>
@@ -91,9 +84,9 @@ export function AnalyticsList({ links }: AnalyticsListProps) {
               {link.click_count > 0 && (
                 <>
                   <Button
-                    variant="outline"
+                    variant="bordered"
                     size="sm"
-                    onClick={() => toggleCard(link.id)}
+                    onPress={() => toggleCard(link.id)}
                     className="w-full"
                   >
                     {isExpanded ? "Masquer" : "Voir"} les détails des clics
@@ -138,7 +131,7 @@ export function AnalyticsList({ links }: AnalyticsListProps) {
                   Ce lien n&apos;a pas encore été utilisé
                 </p>
               )}
-            </CardContent>
+            </CardBody>
           </Card>
         );
       })}
