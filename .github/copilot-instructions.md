@@ -305,10 +305,144 @@ Required environment variables:
 
 ## Git Workflow
 
-- Write meaningful commit messages
-- Ensure tests pass before pushing
-- Run linter before committing: `npm run lint`
-- Keep commits focused and atomic
+This project follows the **Gitflow branching model**. All contributors must adhere to this workflow.
+
+### Branch Structure
+
+**Main Branches** (protected, never delete):
+
+- `main` - Production-ready code. Only updated via merges from `release/*` or `hotfix/*` branches. Always tagged with version numbers.
+- `develop` - Integration branch for features. Reflects the latest development changes for the next release.
+
+**Supporting Branches** (temporary, delete after merge):
+
+- `feature/*` - New features and non-emergency bug fixes
+- `release/*` - Preparation for production release (version bump, final testing, bug fixes)
+- `hotfix/*` - Critical production bug fixes
+
+### Branch Naming Conventions
+
+- Feature branches: `feature/<issue-number>-<short-description>` (e.g., `feature/123-add-user-profile`)
+- Release branches: `release/<version>` (e.g., `release/1.2.0`)
+- Hotfix branches: `hotfix/<version>` (e.g., `hotfix/1.2.1`)
+
+Use kebab-case for descriptions. Keep branch names concise but descriptive.
+
+### Workflow
+
+#### Feature Development
+
+1. **Start a new feature:**
+
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b feature/123-new-feature
+   ```
+
+2. **Work on the feature:**
+   - Make commits with meaningful messages
+   - Run tests and linter before committing: `npm test && npm run lint`
+   - Keep commits focused and atomic
+   - Push regularly to remote: `git push origin feature/123-new-feature`
+
+3. **Complete the feature:**
+   - Ensure all tests pass
+   - Update documentation if needed
+   - Create a Pull Request (PR) to merge into `develop`
+   - Request code review
+   - After approval and merge, delete the feature branch
+
+#### Release Process
+
+1. **Start a release:**
+
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b release/1.2.0
+   ```
+
+2. **Prepare the release:**
+   - Bump version in `package.json`
+   - Update `CHANGELOG.md` or release notes
+   - Fix release-specific bugs (only critical fixes, no new features)
+   - Run full test suite: `npm test`
+
+3. **Finalize the release:**
+   - Create PR to merge into `main`
+   - After merge to `main`, tag the release: `git tag -a v1.2.0 -m "Release 1.2.0"`
+   - Merge back into `develop` to include any release fixes
+   - Delete the release branch
+
+#### Hotfix Process
+
+1. **Start a hotfix:**
+
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b hotfix/1.2.1
+   ```
+
+2. **Apply the fix:**
+   - Fix the critical bug
+   - Bump patch version in `package.json`
+   - Test thoroughly: `npm test`
+
+3. **Finalize the hotfix:**
+   - Create PR to merge into `main`
+   - After merge to `main`, tag the hotfix: `git tag -a v1.2.1 -m "Hotfix 1.2.1"`
+   - Merge back into `develop` (or current `release/*` if exists)
+   - Delete the hotfix branch
+
+### Merge Strategy
+
+- Use **squash merging** for feature branches to keep history clean
+- Use **merge commits** for release and hotfix branches to preserve history
+- Never force push to `main` or `develop`
+- Always create PRs for merging; direct commits to protected branches are forbidden
+
+### Commit Message Conventions
+
+Follow the format: `<type>(<scope>): <description>`
+
+**Types:**
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, no logic change)
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Build process or auxiliary tool changes
+
+**Example:**
+
+```
+feat(api): add rate limiting to short link creation
+fix(analytics): correct click count calculation
+docs(readme): update deployment instructions
+```
+
+### Pre-commit Checklist
+
+Before every commit:
+
+- [ ] All tests pass: `npm test`
+- [ ] No linting errors: `npm run lint`
+- [ ] Code follows project conventions
+- [ ] Relevant documentation updated
+- [ ] Commit message follows conventions
+
+### Pull Request Guidelines
+
+- Provide a clear title and description
+- Reference related issues (e.g., "Closes #123")
+- Ensure CI/CD checks pass
+- Request at least one code review
+- Address all review comments before merging
+- Keep PRs focused and reasonably sized
 
 ## Documentation
 
