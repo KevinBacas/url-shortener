@@ -3,9 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Button, Input, Card } from "@heroui/react";
 import { Check, Copy, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -98,8 +96,8 @@ export function HomepageForm() {
                 Vous devez être connecté pour créer des liens raccourcis.
               </p>
             </div>
-            <Button asChild className="w-full">
-              <Link href="/login">Se connecter</Link>
+            <Button as={Link} href="/login" className="w-full">
+              Se connecter
             </Button>
           </Card>
         );
@@ -132,19 +130,36 @@ export function HomepageForm() {
     <div className="space-y-4">
       <form
         onSubmit={handleSubmit}
-        className="flex w-full max-w-2xl flex-col gap-2 mx-auto sm:flex-row"
+        className="flex w-full max-w-2xl flex-col gap-2 mx-auto sm:flex-row sm:items-center"
       >
         <Input
           type="url"
           placeholder="Collez votre lien ici..."
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          className="h-12 flex-1"
-          disabled={isLoading}
+          size="lg"
+          variant="bordered"
+          radius="md"
+          classNames={{
+            base: "flex-1",
+            inputWrapper: "h-unit-12 min-h-unit-12",
+            input: "text-base",
+          }}
+          isDisabled={isLoading}
         />
-        <Button type="submit" className="h-12 px-8" disabled={isLoading}>
+        <Button
+          type="submit"
+          size="lg"
+          color="primary"
+          radius="md"
+          className="h-unit-12 px-8 font-medium"
+          isDisabled={isLoading}
+        >
           {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Raccourcir</span>
+            </>
           ) : (
             "Raccourcir"
           )}
@@ -163,9 +178,9 @@ export function HomepageForm() {
             {shortUrl}
           </Link>
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={copyToClipboard}
+            variant="light"
+            isIconOnly
+            onPress={copyToClipboard}
             aria-label="Copier le lien"
           >
             {copied ? (

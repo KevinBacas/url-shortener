@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import { toast } from "sonner";
 import { LogOut, User } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -62,7 +62,11 @@ export function UserProfile() {
 
   if (!user) {
     return (
-      <Button variant="outline" size="sm" onClick={() => router.push("/login")}>
+      <Button
+        variant="bordered"
+        size="sm"
+        onPress={() => router.push("/login")}
+      >
         Sign in
       </Button>
     );
@@ -74,7 +78,7 @@ export function UserProfile() {
         <User className="h-4 w-4 text-muted-foreground" />
         <span className="font-medium">{user.email}</span>
       </div>
-      <Button variant="outline" size="sm" onClick={handleSignOut}>
+      <Button variant="bordered" size="sm" onPress={handleSignOut}>
         <LogOut className="h-4 w-4 mr-2" />
         Sign out
       </Button>
